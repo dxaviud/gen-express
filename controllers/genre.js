@@ -1,4 +1,5 @@
 const async = require("async");
+const { body, validationResult } = require("express-validator");
 const Genre = require("../models/genre");
 const Book = require("../models/book");
 
@@ -41,13 +42,44 @@ exports.getDetail = (req, res, next) => {
   );
 };
 
-exports.getCreateForm = (req, res) => {
-  res.send("not implemented");
+exports.getCreateForm = (_, res) => {
+  res.render("genreForm", { title: "Create Genre" });
 };
 
-exports.create = (req, res) => {
-  res.send("not implemented");
-};
+exports.create = [
+  body("name", "Genre name required")
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .escape(),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    const genre = new Genre({ name: req.body.name });
+    if (!errors.isEmpty()) {
+      res.render("genreForm", {
+        title: "Create Genre",
+        genre,
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      Genre.findOne({ name: req.body.name }).exec((err, foundGenre) => {
+        if (err) {
+          return next(err);
+        }
+        if (foundGenre) {
+          res.redirect(foundGenre.url);
+        } else {
+          genre.save((err) => {
+            if (err) {
+              return next(err);
+            }
+            res.redirect(genre.url);
+          });
+        }
+      });
+    }
+  },
+];
 
 exports.getRemoveForm = (req, res) => {
   res.send("not implemented");
