@@ -6,7 +6,7 @@ block content
   ul
     each bookinstance in list
       li
-        a(href=bookinstance.url) #{bookinstance.book.title} : #{bookinstance.imprint} -
+        a(href=bookinstance.url) !{bookinstance.book.title} : #{bookinstance.imprint} -
         if bookinstance.status=='Available'
           span.text-success #{bookinstance.status}
         else if bookinstance.status=='Maintenance'

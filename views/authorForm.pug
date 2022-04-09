@@ -11,9 +11,9 @@ block content
       input#familyName.form-control(type='text' placeholder='Family name' name='familyName' required='true' value=(undefined===author ? '' : author.familyName))
     div.form-group
       label(for='dateOfBirth') Date of birth:
-      input#dateOfBirth.form-control(type='date' name='dateOfBirth' value=(undefined===author ? '' : author.dateOfBirth) )
+      input#dateOfBirth.form-control(type='date' name='dateOfBirth' value=(undefined===author ? '' : author.formInputDateOfBirth) )
       label(for='dateOfDeath') Date of death:
-      input#dateOfDeath.form-control(type='date' name='dateOfDeath' value=(undefined===author ? '' : author.dateOfDeath) )
+      input#dateOfDeath.form-control(type='date' name='dateOfDeath' value=(undefined===author ? '' : author.formInputDateOfDeath) )
     button.btn.btn-primary(type='submit') Submit
   if errors
     ul

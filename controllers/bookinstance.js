@@ -1,4 +1,5 @@
 const { body, validationResult } = require("express-validator");
+const async = require("async");
 const Book = require("../models/book");
 const BookInstance = require("../models/bookinstance");
 
@@ -97,18 +98,116 @@ exports.create = [
   },
 ];
 
-exports.getRemoveForm = (req, res) => {
-  res.send("not implemented");
+exports.getRemoveForm = (req, res, next) => {
+  BookInstance.findById(req.params.id)
+    .populate("book")
+    .exec((err, bookinstance) => {
+      if (err) {
+        return next(err);
+      }
+      if (!bookinstance) {
+        res.redirect("/catalog/bookinstances");
+      } else {
+        res.render("bookinstanceDelete", {
+          title: "Delete Book Instance",
+          bookinstance,
+        });
+      }
+    });
 };
 
-exports.remove = (req, res) => {
-  res.send("not implemented");
+exports.remove = (req, res, next) => {
+  BookInstance.findByIdAndRemove(req.params.id).exec((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/catalog/bookinstances");
+  });
 };
 
-exports.getUpdateForm = (req, res) => {
-  res.send("not implemented");
+exports.getUpdateForm = (req, res, next) => {
+  async.parallel(
+    {
+      bookinstance: (callback) => {
+        BookInstance.findById(req.params.id).populate("book").exec(callback);
+      },
+      books: (callback) => {
+        Book.find({}, "title").exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (!results.bookinstance) {
+        const err = new Error("Book Instance not found");
+        err.status = 404;
+        return next(err);
+      }
+      results.books.sort(function (a, b) {
+        let textA = a.title.toUpperCase();
+        let textB = b.title.toUpperCase();
+        return textA < textB ? -1 : textA > textB ? 1 : 0;
+      });
+      res.render("bookinstanceForm", {
+        title: "Update Book Instance",
+        bookinstance: results.bookinstance,
+        books: results.books,
+      });
+    }
+  );
 };
 
-exports.update = (req, res) => {
-  res.send("not implemented");
-};
+exports.update = [
+  body("book", "Book must be specified").trim().isLength({ min: 1 }).escape(),
+  body("imprint", "Imprint must be specified")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("status").escape(),
+  body("dueBack", "Invalid date")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+  (req, res, next) => {
+    const bookinstance = new BookInstance({ ...req.body, _id: req.params.id });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      async.parallel(
+        {
+          bookinstance: (callback) => {
+            BookInstance.findById(req.params.id)
+              .populate("book")
+              .exec(callback);
+          },
+          books: (callback) => {
+            Book.find({}, "title").exec(callback);
+          },
+        },
+        (err, results) => {
+          if (err) {
+            return next(err);
+          }
+          results.books.sort(function (a, b) {
+            let textA = a.title.toUpperCase();
+            let textB = b.title.toUpperCase();
+            return textA < textB ? -1 : textA > textB ? 1 : 0;
+          });
+          res.render("bookinstanceForm", {
+            title: "Update Book Instance",
+            bookinstance: results.bookinstance,
+            books: results.books,
+          });
+        }
+      );
+      return;
+    } else {
+      BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {}, (err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect(bookinstance.url);
+      });
+    }
+  },
+];

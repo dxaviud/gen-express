@@ -38,6 +38,14 @@ AuthorSchema.virtual("lifespan").get(function () {
   return lifespan;
 });
 
+AuthorSchema.virtual("formInputDateOfBirth").get(function () {
+  return this.dateOfBirth ? this.dateOfBirth.toISOString().split("T")[0] : "";
+});
+
+AuthorSchema.virtual("formInputDateOfDeath").get(function () {
+  return this.dateOfDeath ? this.dateOfDeath.toISOString().split("T")[0] : "";
+});
+
 AuthorSchema.virtual("url").get(function () {
   return "/catalog/author/" + this._id;
 });

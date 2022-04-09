@@ -81,18 +81,96 @@ exports.create = [
   },
 ];
 
-exports.getRemoveForm = (req, res) => {
-  res.send("not implemented");
+exports.getRemoveForm = (req, res, next) => {
+  async.parallel(
+    {
+      genre: (callback) => {
+        Genre.findById(req.params.id).exec(callback);
+      },
+      books: (callback) => {
+        Book.find({ genre: req.params.id }).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (!results.genre) {
+        res.redirect("/catalog/genres");
+      } else {
+        res.render("genreDelete", {
+          title: "Delete Genre",
+          genre: results.genre,
+          books: results.books,
+        });
+      }
+    }
+  );
 };
 
 exports.remove = (req, res) => {
-  res.send("not implemented");
+  async.parallel(
+    {
+      genre: (callback) => {
+        Genre.findById(req.params.id).exec(callback);
+      },
+      books: (callback) => {
+        Book.find({ genre: req.params.id }).exec(callback);
+      },
+    },
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      if (results.books.length > 0) {
+        res.render("genreDelete", {
+          title: "Delete Genre",
+          genre: results.genre,
+          books: results.books,
+        });
+      } else {
+        Genre.findByIdAndRemove(req.params.id, (err) => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect("/catalog/genres");
+        });
+      }
+    }
+  );
 };
 
-exports.getUpdateForm = (req, res) => {
-  res.send("not implemented");
+exports.getUpdateForm = (req, res, next) => {
+  Genre.findById(req.params.id, (err, genre) => {
+    if (err) {
+      return next(err);
+    }
+    res.render("genreForm", { title: "Create Genre", genre });
+  });
 };
 
-exports.update = (req, res) => {
-  res.send("not implemented");
-};
+exports.update = [
+  body("name", "Genre name required")
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .escape(),
+  (req, res, next) => {
+    const genre = new Genre({ name: req.body.name, _id: req.params.id });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.render("genreForm", {
+        title: "Create Genre",
+        genre,
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      Genre.findByIdAndUpdate(req.params.id, genre, {}, (err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect(genre.url);
+      });
+    }
+  },
+];

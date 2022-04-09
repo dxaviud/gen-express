@@ -149,10 +149,55 @@ exports.remove = (req, res, next) => {
   );
 };
 
-exports.getUpdateForm = (req, res) => {
-  res.send("not implemented");
+exports.getUpdateForm = (req, res, next) => {
+  Author.findById(req.params.id, (err, author) => {
+    if (err) {
+      return next(err);
+    }
+    res.render("authorForm", { title: "Update Author", author });
+  });
 };
 
-exports.update = (req, res) => {
-  res.send("not implemented");
-};
+exports.update = [
+  body("firstName")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("First name must be specified.")
+    .isAlphanumeric()
+    .withMessage("First name has non-alphanumeric characters."),
+  body("familyName")
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage("Family name must be specified.")
+    .isAlphanumeric()
+    .withMessage("Family name has non-alphanumeric characters."),
+  body("dateOfBirth", "Invalid date of birth")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+  body("dateOfDeath", "Invalid date of death")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.render("authorForm", {
+        title: "Create Author",
+        author: req.body,
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      const author = new Author({ ...req.body, _id: req.params.id });
+      Author.findByIdAndUpdate(req.params.id, author, {}, (err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect(author.url);
+      });
+    }
+  },
+];
