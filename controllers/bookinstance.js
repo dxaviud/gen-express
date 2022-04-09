@@ -1,3 +1,5 @@
+const { body, validationResult } = require("express-validator");
+const Book = require("../models/book");
 const BookInstance = require("../models/bookinstance");
 
 exports.getList = (_, res, next) => {
@@ -30,13 +32,70 @@ exports.getDetail = (req, res, next) => {
     });
 };
 
-exports.getCreateForm = (req, res) => {
-  res.send("not implemented");
+exports.getCreateForm = (_, res, next) => {
+  Book.find({}, "title", (err, books) => {
+    if (err) {
+      return next(err);
+    }
+    books.sort(function (a, b) {
+      let textA = a.title.toUpperCase();
+      let textB = b.title.toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+    res.render("bookinstanceForm", { title: "Create Book Instance", books });
+  });
 };
 
-exports.create = (req, res) => {
-  res.send("not implemented");
-};
+exports.create = [
+  body("book", "Book must be specified").trim().isLength({ min: 1 }).escape(),
+  body("imprint", "Imprint must be specified")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("status").escape(),
+  body("dueBack", "Invalid date")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+  (req, res, next) => {
+    const bookinstance = new BookInstance(req.body);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      Book.find({}, "title").exec((err, books) => {
+        if (err) {
+          return next(err);
+        }
+        const selectedBook = bookintance.book;
+        books.forEach((b) => {
+          if (b._id.toString() === selectedBook._id.toString()) {
+            b.selected = "selected";
+          } else {
+            b.selected = false;
+          }
+        });
+        books.sort(function (a, b) {
+          let textA = a.title.toUpperCase();
+          let textB = b.title.toUpperCase();
+          return textA < textB ? -1 : textA > textB ? 1 : 0;
+        });
+        res.render("bookinstanceForm", {
+          title: "Create Book Instance",
+          books,
+          errors: errors.array(),
+          bookinstance,
+        });
+        return;
+      });
+    } else {
+      bookinstance.save((err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect(bookinstance.url);
+      });
+    }
+  },
+];
 
 exports.getRemoveForm = (req, res) => {
   res.send("not implemented");

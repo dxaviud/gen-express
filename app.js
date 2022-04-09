@@ -32,12 +32,12 @@ app.use("/wiki", require("./routes/wiki"));
 app.use("/catalog", require("./routes/catalog"));
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use(function (_, __, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
