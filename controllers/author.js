@@ -138,7 +138,7 @@ exports.remove = (req, res, next) => {
           books: results.books,
         });
       } else {
-        Author.findByIdAndRemove(req.body.id, (err) => {
+        Author.findByIdAndRemove(req.params.id, (err) => {
           if (err) {
             return next(err);
           }

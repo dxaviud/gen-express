@@ -66,7 +66,7 @@ exports.create = [
         if (err) {
           return next(err);
         }
-        const selectedBook = bookintance.book;
+        const selectedBook = bookinstance.book;
         books.forEach((b) => {
           if (b._id.toString() === selectedBook._id.toString()) {
             b.selected = "selected";
@@ -144,6 +144,14 @@ exports.getUpdateForm = (req, res, next) => {
         err.status = 404;
         return next(err);
       }
+      const selectedBook = results.bookinstance.book;
+      results.books.forEach((b) => {
+        if (b._id.toString() === selectedBook._id.toString()) {
+          b.selected = "selected";
+        } else {
+          b.selected = false;
+        }
+      });
       results.books.sort(function (a, b) {
         let textA = a.title.toUpperCase();
         let textB = b.title.toUpperCase();

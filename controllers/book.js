@@ -174,7 +174,7 @@ exports.create = [
     } else {
       book.save((err) => {
         if (err) {
-          return next(errr);
+          return next(err);
         }
         res.redirect(book.url);
       });

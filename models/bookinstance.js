@@ -26,7 +26,7 @@ BookInstanceSchema.virtual("dueBackFormatted").get(function () {
 });
 
 BookInstanceSchema.virtual("formInputDueBack").get(function () {
-  return this.dueBack.toISOString().split("T")[0];
+  return this.dueBack ? this.dueBack.toISOString().split("T")[0] : "";
 });
 
 module.exports = mongoose.model("BookInstance", BookInstanceSchema);
