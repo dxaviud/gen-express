@@ -37,6 +37,7 @@ exports.getDetail = (req, res, next) => {
         title: "Author Detail",
         author: results.author,
         authorBooks: results.authorBooks,
+        owns: req.user.authors.includes(results.author._id),
       });
     }
   );

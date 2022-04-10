@@ -1,0 +1,38 @@
+extends layout
+
+block content
+
+  h1 !{title}
+  ul
+    if user.authors.length
+      li authors
+        ul
+          each author in user.authors
+            li 
+              a(href=author.url) !{author.firstName}
+    else
+      li You have created no authors
+    if user.books.length
+      li books
+        ul
+          each book in user.books
+            li 
+              a(href=book.url) !{book.title}
+    else
+      li You have created no books
+    if user.bookinstances.length
+      li book instances
+        ul
+          each instance in user.bookinstances
+            li 
+              a(href=instance.url) !{instance._id}
+    else
+      li You have created no book instances
+    if user.genres.length
+      li genres
+        ul
+          each genre in user.genres
+            li 
+              a(href=genre.url) !{genre.name}
+    else
+      li You have created no genres

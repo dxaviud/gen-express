@@ -37,6 +37,7 @@ exports.getDetail = (req, res, next) => {
         title: "Genre Detail",
         genre: results.genre,
         genreBooks: results.genreBooks,
+        owns: req.user.genres.includes(results.genre._id),
       });
     }
   );

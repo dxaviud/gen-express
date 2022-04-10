@@ -72,12 +72,13 @@ exports.getDetail = (req, res, next) => {
         title: "Book Detail",
         book: results.book,
         bookInstances: results.bookInstances,
+        owns: req.user.books.includes(results.book._id),
       });
     }
   );
 };
 
-exports.getCreateForm = (req, res, next) => {
+exports.getCreateForm = (_, res, next) => {
   async.parallel(
     {
       authors: (callback) => {

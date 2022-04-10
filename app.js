@@ -4,6 +4,8 @@ const express = require("express");
 const path = require("path");
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const compression = require("compression");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 
@@ -21,6 +23,8 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
 // middleware
+app.use(helmet());
+app.use(compression());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

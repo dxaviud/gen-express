@@ -6,31 +6,6 @@ block content
   if users.length
     ul
       each user in users
-        li !{user.username}
-          ul
-            if user.authors.length
-              li authors
-                ul
-                  each author in user.authors
-                    li 
-                      a(href=author.url) !{author.firstName}
-            if user.books.length
-              li books
-                ul
-                  each book in user.books
-                    li 
-                      a(href=book.url) !{book.title}
-            if user.bookinstances.length
-              li book instances
-                ul
-                  each instance in user.bookinstances
-                    li 
-                      a(href=instance.url) !{instance._id}
-            if user.genres.length
-              li genres
-                ul
-                  each genre in user.genres
-                    li 
-                      a(href=genre.url) !{genre.name}
+        li: a(href=user.url) !{user.username}
   else
     h4 There are no users yet. Register now to be the first!

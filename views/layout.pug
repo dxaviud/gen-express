@@ -15,7 +15,8 @@ html(lang='en')
           block sidebar
             ul(class='sidebar-nav')
               if username
-                li: strong !{username}
+                li
+                  a(href=('/users/' + username)): strong !{username}
                 li
                   a(href='/logout') Logout
               else
@@ -37,16 +38,17 @@ html(lang='en')
                 a(href='/catalog/genres') All genres
               li
                 a(href='/catalog/bookinstances') All book-instances
-              li
-                hr
-              li
-                a(href='/catalog/author/create') Create new author
-              li
-                a(href='/catalog/genre/create') Create new genre
-              li
-                a(href='/catalog/book/create') Create new book
-              li
-                a(href='/catalog/bookinstance/create') Create new book instance (copy)
+              if username
+                li
+                  hr
+                li
+                  a(href='/catalog/author/create') Create new author
+                li
+                  a(href='/catalog/genre/create') Create new genre
+                li
+                  a(href='/catalog/book/create') Create new book
+                li
+                  a(href='/catalog/bookinstance/create') Create new book instance (copy)
 
         div(class='col-sm-10')
           block content

@@ -11,4 +11,8 @@ const UserSchema = new mongoose.Schema({
   genres: [{ type: Schema.Types.ObjectId, ref: "Genre" }],
 });
 
+UserSchema.virtual("url").get(function () {
+  return "/users/" + this.username;
+});
+
 module.exports = mongoose.model("User", UserSchema);

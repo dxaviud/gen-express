@@ -29,6 +29,7 @@ exports.getDetail = (req, res, next) => {
       res.render("bookinstanceDetail", {
         title: "Book Instance Detail",
         bookinstance,
+        owns: req.user.bookinstances.includes(bookinstance._id),
       });
     });
 };
