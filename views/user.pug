@@ -11,7 +11,7 @@ block content
             li 
               a(href=author.url) !{author.firstName}
     else
-      li You have created no authors
+      li No authors
     if user.books.length
       li books
         ul
@@ -19,7 +19,7 @@ block content
             li 
               a(href=book.url) !{book.title}
     else
-      li You have created no books
+      li No books
     if user.bookinstances.length
       li book instances
         ul
@@ -27,7 +27,7 @@ block content
             li 
               a(href=instance.url) !{instance._id}
     else
-      li You have created no book instances
+      li No book instances
     if user.genres.length
       li genres
         ul
@@ -35,4 +35,4 @@ block content
             li 
               a(href=genre.url) !{genre.name}
     else
-      li You have created no genres
+      li No genres
