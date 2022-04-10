@@ -1,6 +1,7 @@
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
+const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
@@ -22,13 +23,19 @@ app.set("view engine", "pug");
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieSession({ secret: "steak" }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use((req, res, next) => {
+  if (req.session) {
+    res.locals.username = req.session.username;
+  }
+  next();
+});
 
 // routes
 app.use("/", require("./routes/index"));
 app.use("/users", require("./routes/users"));
-app.use("/wiki", require("./routes/wiki"));
 app.use("/catalog", require("./routes/catalog"));
 
 // catch 404 and forward to error handler

@@ -176,13 +176,21 @@ exports.create = [
         if (err) {
           return next(err);
         }
-        res.redirect(book.url);
+        req.user.updateOne({ $push: { books: book } }, (err) => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect(book.url);
+        });
       });
     }
   },
 ];
 
 exports.getRemoveForm = (req, res, next) => {
+  if (!req.user.books.includes(req.params.id)) {
+    res.redirect("/catalog/books");
+  }
   async.parallel(
     {
       book: (callback) => {
@@ -210,6 +218,9 @@ exports.getRemoveForm = (req, res, next) => {
 };
 
 exports.remove = (req, res, next) => {
+  if (!req.user.books.includes(req.params.id)) {
+    res.redirect("/catalog/books");
+  }
   async.parallel(
     {
       book: (callback) => {
@@ -234,7 +245,12 @@ exports.remove = (req, res, next) => {
           if (err) {
             return next(err);
           }
-          res.redirect("/catalog/books");
+          req.user.updateOne({ $pull: { books: req.params.id } }, (err) => {
+            if (err) {
+              return next(err);
+            }
+            res.redirect("/catalog/books");
+          });
         });
       }
     }
@@ -242,6 +258,9 @@ exports.remove = (req, res, next) => {
 };
 
 exports.getUpdateForm = (req, res, next) => {
+  if (!req.user.books.includes(req.params.id)) {
+    res.redirect("/catalog/books");
+  }
   async.parallel(
     {
       book: (callback) => {
@@ -285,7 +304,10 @@ exports.getUpdateForm = (req, res, next) => {
 };
 
 exports.update = [
-  (req, _, next) => {
+  (req, res, next) => {
+    if (!req.user.books.includes(req.params.id)) {
+      res.redirect("/catalog/books");
+    }
     if (!(req.body.genre instanceof Array)) {
       if (typeof req.body.genre === "undefined") {
         req.body.genre = [];

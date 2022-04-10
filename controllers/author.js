@@ -84,13 +84,21 @@ exports.create = [
         if (err) {
           return next(err);
         }
-        res.redirect(author.url);
+        req.user.updateOne({ $push: { authors: author } }, (err) => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect(author.url);
+        });
       });
     }
   },
 ];
 
 exports.getRemoveForm = (req, res, next) => {
+  if (!req.user.authors.includes(req.params.id)) {
+    res.redirect("/catalog/authors");
+  }
   async.parallel(
     {
       author: (callback) => {
@@ -118,6 +126,9 @@ exports.getRemoveForm = (req, res, next) => {
 };
 
 exports.remove = (req, res, next) => {
+  if (!req.user.authors.includes(req.params.id)) {
+    res.redirect("/catalog/authors");
+  }
   async.parallel(
     {
       author: (callback) => {
@@ -142,7 +153,12 @@ exports.remove = (req, res, next) => {
           if (err) {
             return next(err);
           }
-          res.redirect("/catalog/authors");
+          req.user.updateOne({ $pull: { authors: req.params.id } }, (err) => {
+            if (err) {
+              return next(err);
+            }
+            res.redirect("/catalog/authors");
+          });
         });
       }
     }
@@ -150,6 +166,9 @@ exports.remove = (req, res, next) => {
 };
 
 exports.getUpdateForm = (req, res, next) => {
+  if (!req.user.authors.includes(req.params.id)) {
+    res.redirect("/catalog/authors");
+  }
   Author.findById(req.params.id, (err, author) => {
     if (err) {
       return next(err);
@@ -159,6 +178,12 @@ exports.getUpdateForm = (req, res, next) => {
 };
 
 exports.update = [
+  (req, res, next) => {
+    if (!req.user.authors.includes(req.params.id)) {
+      res.redirect("/catalog/authors");
+    }
+    next();
+  },
   body("firstName")
     .trim()
     .isLength({ min: 1 })

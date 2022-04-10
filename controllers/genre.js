@@ -73,7 +73,12 @@ exports.create = [
             if (err) {
               return next(err);
             }
-            res.redirect(genre.url);
+            req.user.updateOne({ $push: { genres: genre } }, (err) => {
+              if (err) {
+                return next(err);
+              }
+              res.redirect(genre.url);
+            });
           });
         }
       });
@@ -82,6 +87,9 @@ exports.create = [
 ];
 
 exports.getRemoveForm = (req, res, next) => {
+  if (!req.user.genres.includes(req.params.id)) {
+    res.redirect("/catalog/genres");
+  }
   async.parallel(
     {
       genre: (callback) => {
@@ -108,7 +116,10 @@ exports.getRemoveForm = (req, res, next) => {
   );
 };
 
-exports.remove = (req, res) => {
+exports.remove = (req, res, next) => {
+  if (!req.user.genres.includes(req.params.id)) {
+    res.redirect("/catalog/genres");
+  }
   async.parallel(
     {
       genre: (callback) => {
@@ -133,7 +144,12 @@ exports.remove = (req, res) => {
           if (err) {
             return next(err);
           }
-          res.redirect("/catalog/genres");
+          req.user.updateOne({ $pull: { genres: req.params.id } }, (err) => {
+            if (err) {
+              return next(err);
+            }
+            res.redirect("/catalog/genres");
+          });
         });
       }
     }
@@ -141,6 +157,9 @@ exports.remove = (req, res) => {
 };
 
 exports.getUpdateForm = (req, res, next) => {
+  if (!req.user.genres.includes(req.params.id)) {
+    res.redirect("/catalog/genres");
+  }
   Genre.findById(req.params.id, (err, genre) => {
     if (err) {
       return next(err);
@@ -150,6 +169,12 @@ exports.getUpdateForm = (req, res, next) => {
 };
 
 exports.update = [
+  (req, res, next) => {
+    if (!req.user.genres.includes(req.params.id)) {
+      res.redirect("/catalog/genres");
+    }
+    next();
+  },
   body("name", "Genre name required")
     .trim()
     .isLength({ min: 2, max: 100 })

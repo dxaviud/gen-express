@@ -92,13 +92,24 @@ exports.create = [
         if (err) {
           return next(err);
         }
-        res.redirect(bookinstance.url);
+        req.user.updateOne(
+          { $push: { bookinstances: bookinstance } },
+          (err) => {
+            if (err) {
+              return next(err);
+            }
+            res.redirect(bookinstance.url);
+          }
+        );
       });
     }
   },
 ];
 
 exports.getRemoveForm = (req, res, next) => {
+  if (!req.user.bookinstances.includes(req.params.id)) {
+    res.redirect("/catalog/bookinstances");
+  }
   BookInstance.findById(req.params.id)
     .populate("book")
     .exec((err, bookinstance) => {
@@ -117,15 +128,26 @@ exports.getRemoveForm = (req, res, next) => {
 };
 
 exports.remove = (req, res, next) => {
+  if (!req.user.bookinstances.includes(req.params.id)) {
+    res.redirect("/catalog/bookinstances");
+  }
   BookInstance.findByIdAndRemove(req.params.id).exec((err) => {
     if (err) {
       return next(err);
     }
-    res.redirect("/catalog/bookinstances");
+    req.user.updateOne({ $pull: { bookinstances: req.params.id } }, (err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect("/catalog/bookinstances");
+    });
   });
 };
 
 exports.getUpdateForm = (req, res, next) => {
+  if (!req.user.bookinstances.includes(req.params.id)) {
+    res.redirect("/catalog/bookinstances");
+  }
   async.parallel(
     {
       bookinstance: (callback) => {
@@ -167,6 +189,12 @@ exports.getUpdateForm = (req, res, next) => {
 };
 
 exports.update = [
+  (req, res, next) => {
+    if (!req.user.bookinstances.includes(req.params.id)) {
+      res.redirect("/catalog/bookinstances");
+    }
+    next();
+  },
   body("book", "Book must be specified").trim().isLength({ min: 1 }).escape(),
   body("imprint", "Imprint must be specified")
     .trim()
