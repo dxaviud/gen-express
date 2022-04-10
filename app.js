@@ -1,3 +1,4 @@
+require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -7,7 +8,7 @@ const logger = require("morgan");
 const mongoose = require("mongoose");
 
 const app = express();
-const uri = "mongodb://localhost:27017/local_library";
+const uri = process.env.MONGO_URI || "mongodb://localhost:27017/local_library";
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 const connection = mongoose.connection;
 connection.on(
