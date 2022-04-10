@@ -1,5 +1,7 @@
 # gen-express
 
+Deployed to Heroku -> [App](https://gen-express.herokuapp.com/)  
+
 Initialized with `express-generator` (updated all packages afterwards). This is roughly based on MDN's express [LocalLibrary](https://github.com/mdn/express-locallibrary-tutorial/tree/master) but has cookie-based authentication and authorization implemented.
 
 ## Local development setup
